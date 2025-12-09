@@ -1,7 +1,80 @@
+// import express from "express";
+// import auth from "../middleware/auth.js";
+// import uploadPostImage from "../middleware/upload.js";
+
+// import {
+//   createPost,
+//   getAllPosts,
+//   likePost,
+//   addComment,
+//   getPostById,
+//   updatePost,
+//   deletePost,
+//   deleteComment
+// } from "../controllers/postController.js";
+
+// const router = express.Router();
+
+// // -------------------------------
+// // CREATE POST (text + optional image)
+// // -------------------------------
+// router.post(
+//   "/",
+//   auth,
+//   uploadPostImage.single("image"),
+//   createPost
+// );
+
+// // -------------------------------
+// // UPDATE POST (ONLY OWNER, text + optional image)
+// // -------------------------------
+// router.put(
+//   "/:postId",
+//   auth,
+//   uploadPostImage.single("image"),
+//   updatePost
+// );
+
+// //delete post
+
+// router.delete("/:postId", auth, deletePost);
+
+// // -------------------------------
+// // PUBLIC ROUTES
+// // -------------------------------
+// router.get("/", getAllPosts);         
+// router.get("/:postId", getPostById);  
+
+// // -------------------------------
+// // AUTH ROUTES
+// // -------------------------------
+// router.put("/like/:postId", auth, likePost);     
+// router.post("/comment/:postId", auth, addComment);
+// router.delete("/comment/:postId/:commentId", auth, deleteComment);
+
+// export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import express from "express";
 import auth from "../middleware/auth.js";
 import uploadPostImage from "../middleware/upload.js";
-
+import { requirePremiumForFeature } from "../middleware/membership.js";
 import {
   createPost,
   getAllPosts,
@@ -16,40 +89,35 @@ import {
 const router = express.Router();
 
 // -------------------------------
-// CREATE POST (text + optional image)
+// CREATE POST → Basic users limited by daily post, premium unrestricted
 // -------------------------------
-router.post(
-  "/",
-  auth,
-  uploadPostImage.single("image"),
-  createPost
-);
+router.post("/", auth, uploadPostImage.single("image"), createPost);
 
 // -------------------------------
-// UPDATE POST (ONLY OWNER, text + optional image)
+// UPDATE POST → Only post owner
 // -------------------------------
-router.put(
-  "/:postId",
-  auth,
-  uploadPostImage.single("image"),
-  updatePost
-);
+router.put("/:postId", auth, uploadPostImage.single("image"), updatePost);
 
-//delete post
-
+// -------------------------------
+// DELETE POST → Only post owner
+// -------------------------------
 router.delete("/:postId", auth, deletePost);
 
 // -------------------------------
 // PUBLIC ROUTES
 // -------------------------------
-router.get("/", getAllPosts);         
-router.get("/:postId", getPostById);  
+router.get("/", getAllPosts);
+router.get("/:postId", getPostById);
 
 // -------------------------------
 // AUTH ROUTES
 // -------------------------------
-router.put("/like/:postId", auth, likePost);     
-router.post("/comment/:postId", auth, addComment);
+router.put("/like/:postId", auth, likePost);
+
+// COMMENT → PREMIUM ONLY
+router.post("/comment/:postId", auth, requirePremiumForFeature, addComment);
+
+// DELETE COMMENT → Only comment owner or post owner
 router.delete("/comment/:postId/:commentId", auth, deleteComment);
 
 export default router;
